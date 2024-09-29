@@ -225,4 +225,4 @@ async def status(ctx):
     await ctx.send(response)
 
 # Run the bot with your token
-bot.run('. . .')
+bot.run('abc')

@@ -225,6 +225,6 @@ async def status(ctx):
     await ctx.send(response)
 
 
-token = 'MTEzMDc4MDI3NDU3MDA1MTY2Nw.Gvl-1P.0w_ZXK1uQQL_n9Qp1r4zUHqMp9ZLHnZR9Q9DyQ'
+token = '. . .'
 # Run the bot with your token
 bot.run(token)

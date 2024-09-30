@@ -126,6 +126,10 @@ async def draw(ctx):
             # Remove game files and stop further play
             json_files = [file_names['main'], file_names['secondary'], file_names['third'], file_names['fourth'], file_names['in_play'], file_names['turn']]
             remove_files(json_files)
+            # Reset card lists and turn
+            main_cards, secondary_cards, third_cards, fourth_cards = original_main_cards[:], original_secondary_cards[:], original_third_cards[:], original_fourth_cards[:]
+            cards_in_play = []
+            current_turn = 0        
             return
 
         # After turn 10, show cards in play

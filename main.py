@@ -59,6 +59,8 @@ def load_game_state():
 
 # Draw a card and handle resets
 def extract_card(card_list, original_list, list_name, current_turn, forced_card=None):
+    notification = ""
+
     if forced_card:
         card = forced_card
         card_list.remove(card)
@@ -70,21 +72,25 @@ def extract_card(card_list, original_list, list_name, current_turn, forced_card=
 
     # Handle specific rules for "Black Swan"
     if card == 'Black Swan' and list_name == 'Main':
-        card_list[:] = original_list[:]
-        card = random.choice(card_list)
+        card_list[:] = original_list[:]  # Reset the deck
+        notification += "Black Swan was drawn! The main deck has been reset to the original set. Drawing another card...\n"
+        card = random.choice(card_list)  # Redraw a new card
         card_list.remove(card)
+        notification += f"New card drawn after Black Swan: {card}\n"
 
     # After turn 10, add the card to cards in play
     if current_turn >= 10 and card not in cards_in_play:
         cards_in_play.append(card)
 
-    return card
+    return card, notification
+
 
 # Command to draw a card
 @bot.command(name='draw')
 async def draw(ctx):
     global cards_in_play
 
+    # Load the current state of the game
     main_cards, secondary_cards, third_cards, fourth_cards, cards_in_play, current_turn = load_game_state()
 
     current_turn += 1
@@ -92,26 +98,39 @@ async def draw(ctx):
     
     # Draw from main and secondary decks on the first turn
     if current_turn == 1:
-        main_card = extract_card(main_cards, original_main_cards, "Main", current_turn, 'Calms of Summer')
-        secondary_card = extract_card(secondary_cards, original_secondary_cards, "Secondary", current_turn, 'The Misty Mountains Cold')
+        main_card, main_notification = extract_card(main_cards, original_main_cards, "Main", current_turn, 'Calms of Summer')
+        secondary_card, _ = extract_card(secondary_cards, original_secondary_cards, "Secondary", current_turn, 'The Misty Mountains Cold')
         response += f"Main Card: {main_card}\nSecondary Card: {secondary_card}\n"
+        response += main_notification
     else:
-        main_card = extract_card(main_cards, original_main_cards, "Main", current_turn)
-        secondary_card = extract_card(secondary_cards, original_secondary_cards, "Secondary", current_turn)
+        main_card, main_notification = extract_card(main_cards, original_main_cards, "Main", current_turn)
+        secondary_card, _ = extract_card(secondary_cards, original_secondary_cards, "Secondary", current_turn)
         response += f"Main Card: {main_card}\nSecondary Card: {secondary_card}\n"
+        response += main_notification
 
     # Draw from third and fourth decks after specific turns
     if current_turn >= 5:
-        third_card = extract_card(third_cards, original_third_cards, "Third", current_turn)
+        third_card, _ = extract_card(third_cards, original_third_cards, "Third", current_turn)
         response += f"Third Card: {third_card}\n"
+
     if current_turn >= 10:
-        fourth_card = extract_card(fourth_cards, original_fourth_cards, "Fourth", current_turn)
+        fourth_card, _ = extract_card(fourth_cards, original_fourth_cards, "Fourth", current_turn)
         response += f"Fourth Card: {fourth_card}\n"
+
+        # End the game if "Times Up!" is drawn
         if fourth_card == 'Times Up!':
-            response += "Times Up! drawn! Ending the game."
+            response += "Times Up! drawn! The game is over."
             await ctx.send(response)
-            await ctx.send("Game over.")
+            await ctx.send("Game over. Thank you for playing!")
+            
+            # Remove game files and stop further play
+            json_files = [file_names['main'], file_names['secondary'], file_names['third'], file_names['fourth'], file_names['in_play'], file_names['turn']]
+            remove_files(json_files)
             return
+
+        # After turn 10, show cards in play
+        cards_in_play_message = f"Cards in play (after turn 10): {', '.join(cards_in_play)}\n"
+        response += cards_in_play_message
 
     # Save current state
     save_json(main_cards, file_names['main'])

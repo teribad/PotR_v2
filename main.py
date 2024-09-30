@@ -14,8 +14,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 original_main_cards = ['Black Swan', 'Deep Snow', 'Heavy rains of Autumn', 'Power Overwhelming', 'Power Overwhelming',
                        'Restlessness of Spring', 'Winter Storms', 'Imarins Blessings', 'Flood!', 'Calms of Summer']
 original_secondary_cards = ['There be Dragons!', 'There be Dragons!', 'The Misty Mountains Cold', 'The Misty Mountains Cold', 
-                            'Bloodlust!', 'Bloodlust!']
-original_third_cards = ['Seafarers!', 'Ferry!', 'Crab Infestation!', 'Plague!', 'Pirates!']
+                            'The Misty Mountains Cold','Bloodlust!', 'Bloodlust!']
+original_third_cards = ['Seafarers!', 'Ferry!', 'Crab Infestation!', 'Plague!', 'Merchant Ships!']
 original_fourth_cards = ['The End is Nigh!', 'The End is Nigh!', 'Times Up!']
 
 cards_in_play = []
@@ -120,6 +120,8 @@ async def draw(ctx):
         # End the game if "Times Up!" is drawn
         if fourth_card == 'Times Up!':
             response += "Times Up! drawn! The game is over."
+            cards_in_play_message = f"Cards in play (after turn 10): {', '.join(cards_in_play)}\n"
+            response += cards_in_play_message
             await ctx.send(response)
             await ctx.send("Game over. Thank you for playing!")
             
